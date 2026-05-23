@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate workflow JSON
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check workflow.json exists
+        run: |
+          if [ ! -f workflow.json ]; then
+            echo "workflow.json is missing"
+            exit 1
+          fi
+          echo "workflow.json found"
+
+      - name: Validate workflow.json is valid JSON
+        run: |
+          cat workflow.json | python3 -m json.tool > /dev/null
+          echo "workflow.json is valid JSON"
+
+      - name: Check required fields exist in workflow
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+
+          with open("workflow.json") as f:
+              data = json.load(f)
+
+          required = ["name", "nodes", "connections"]
+          missing = [r for r in required if r not in data]
+
+          if missing:
+              print(f"Missing required fields: {missing}")
+              sys.exit(1)
+
+          print(f"All required fields present: {required}")
+          print(f"Node count: {len(data['nodes'])}")
+          EOF
+
+  lint-docs:
+    name: Check docs are present
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          files=("README.md" "SETUP.md" ".gitignore" "workflow.json")
+          all_good=true
+
+          for f in "${files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing: $f"
+              all_good=false
+            else
+              echo "Found: $f"
+            fi
+          done
+
+          if [ "$all_good" = false ]; then
+            exit 1
+          fi
+
+      - name: Check README is not empty
+        run: |
+          if [ ! -s README.md ]; then
+            echo "README.md is empty"
+            exit 1
+          fi
+          echo "README.md looks good"
