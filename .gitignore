@@ -1,0 +1,38 @@
+# environment and secrets
+.env
+.env.local
+.env.*.local
+*.secret
+secrets.json
+credentials.json
+
+# n8n local data
+.n8n/
+n8n-data/
+*.sqlite
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editor folders
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# logs
+*.log
+logs/
+npm-debug.log*
+
+# node (if you ever add scripts)
+node_modules/
+package-lock.json
+
+# temp and test files
+*.tmp
+*.bak
+test-payload.json
